@@ -1,47 +1,85 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	"log"
+	"os"
+	"path"
+
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 
 	"github.com/disintegration/imaging"
 )
 
 func main() {
-	src, err := imaging.Open("original.png")
+	var outprefix string
+	flag.StringVar(&outprefix, "op", "img/zz_", "output filepath prefix")
+
+	var outsuffix string
+	flag.StringVar(&outsuffix, "os", ".png", "output filepath suffix")
+
+	var xsplit int
+	flag.IntVar(&xsplit, "x", 10, "number of columns")
+
+	var outputHTML bool
+	flag.BoolVar(&outputHTML, "html", false, "outputs html")
+
+	flag.Parse()
+
+	log.Print()
+
+	ret := 0
+	if err := run(outprefix, outsuffix, xsplit, outputHTML); err != nil {
+		ret = 1
+	}
+
+	os.Exit(ret)
+}
+
+func run(outprefix, outsuffix string, xsplit int, outputHTML bool) error {
+	src, err := imaging.Decode(os.Stdin)
 	if err != nil {
-		log.Fatalf("failed to open image: %v", err)
+		return err
 	}
 
-	src = imaging.CropAnchor(src, 320, 480, imaging.Bottom)
-	err = imaging.Save(src, "out.png")
-	if err != nil {
-		log.Fatalf("failed to save image: %v", err)
-	}
+	rct := src.Bounds()
 
-	var arrs [][]int
+	psize := rct.Dx() / xsplit
+	ysplit := rct.Dy() / psize
+	log.Printf("psize=%d,xsplit=%d,ysplit=%d", psize, xsplit, ysplit)
 
-	for y := 0; y < 480; y += 32 {
-		var yarrs []int
-		for x := 0; x < 320; x += 32 {
-			yarrs = append(yarrs, x)
-		}
-		arrs = append(arrs, yarrs)
-	}
+	var emojis, html string
 
-	for i, ys := range arrs {
-		for j, x := range ys {
-			dst := imaging.Crop(src, image.Rect(x, i*32, x+32, i*32+32))
-			ename := fmt.Sprintf("zzajk%02d%d", i, j)
-			err = imaging.Save(dst, ename+".png")
+	for i := 0; i < ysplit; i++ {
+		y := i * psize
+		for j := 0; j < xsplit; j++ {
+			x := j * psize
+			dst := imaging.Crop(src, image.Rect(x, y, x+psize, y+psize))
+			ename := fmt.Sprintf(outprefix+"%02d%02d", i, j)
+			if err := imaging.Save(dst, ename+outsuffix); err != nil {
+				return err
+			}
+			emojis += fmt.Sprintf(":%s:\u200b", path.Base(ename))
+			cwd, err := os.Getwd()
 			if err != nil {
-				log.Fatalf("failed to save image: %v", err)
+				return nil
 			}
-			fmt.Printf(":%s:\u200b", ename)
-			if j == 9 {
-				fmt.Println()
+			html += fmt.Sprintf(`<img src="%s/%s%s" />`, cwd, ename, outsuffix)
+			if j == xsplit-1 {
+				emojis += fmt.Sprintf("\n")
+				html += "<br>"
 			}
 		}
 	}
+
+	if outputHTML {
+		fmt.Printf("<style>img{border:solid 1px black;width:48px}</style>\n%s\n<pre>%s</pre>\n", html, emojis)
+	} else {
+		fmt.Println(emojis)
+	}
+	return nil
 }

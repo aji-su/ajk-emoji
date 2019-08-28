@@ -58,7 +58,7 @@ func run(outprefix, outsuffix string, xsplit int, outputHTML bool) error {
 	var dir, _ = filepath.Split(outprefix)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0755)
+		os.MkdirAll(dir, 0755)
 	}
 
 	for i := 0; i < ysplit; i++ {

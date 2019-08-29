@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	_ "image/gif"
 	_ "image/jpeg"
@@ -53,6 +54,12 @@ func run(outprefix, outsuffix string, xsplit int, outputHTML bool) error {
 	log.Printf("psize=%d,xsplit=%d,ysplit=%d", psize, xsplit, ysplit)
 
 	var emojis, html string
+
+	var dir, _ = filepath.Split(outprefix)
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, 0755)
+	}
 
 	for i := 0; i < ysplit; i++ {
 		y := i * psize

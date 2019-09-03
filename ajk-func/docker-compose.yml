@@ -1,0 +1,11 @@
+version: '3'
+services:
+  minio:
+    image: 'minio/minio'
+    environment:
+      MINIO_ACCESS_KEY: 'testkey'
+      MINIO_SECRET_KEY: 'testsecret'
+      MINIO_REGION: 'ap-northeast-1'
+    ports:
+      - '9000:9000'
+    command: '--compat server /data'

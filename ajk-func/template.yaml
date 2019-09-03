@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+  
+  Sample SAM Template for sam-app
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+    Default: dev
+
+Mappings:
+  Envs:
+    dev:
+      BucketName: 'test-bucket'
+      S3Endpoint: 'http://minio:9000'
+    prod:
+      BucketName: 'test.theboss.tech'
+      S3Endpoint: ''
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    Cors:
+      AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+
+Resources:
+  AjkFunctionCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: ajk-func-create
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /ajk/create
+            Method: POST
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
+          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+
+  AjkFunctionShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: ajk-func-show
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /ajk/show/{requestId}
+            Method: GET
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
+          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+
+  AjkFunctionDownload:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: ajk-func-download
+      Runtime: go1.x
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /ajk/download/{requestId}
+            Method: GET
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
+          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  AjkAPI:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/ajk/"
+  AjkFunctionCreate:
+    Description: "First Lambda Function ARN"
+    Value: !GetAtt AjkFunctionCreate.Arn
+  AjkFunctionCreateIamRole:
+    Description: "Implicit IAM Role created for ajk function"
+    Value: !GetAtt AjkFunctionCreateRole.Arn
+  AjkFunctionShow:
+    Description: "show"
+    Value: !GetAtt AjkFunctionShow.Arn
+  AjkFunctionShowIamRole:
+    Description: "show role"
+    Value: !GetAtt AjkFunctionShowRole.Arn
+  AjkFunctionDownload:
+    Description: "show"
+    Value: !GetAtt AjkFunctionShow.Arn
+  AjkFunctionShowIamRole:
+    Description: "download role"
+    Value: !GetAtt AjkFunctionDownloadRole.Arn

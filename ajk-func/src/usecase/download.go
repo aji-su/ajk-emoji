@@ -44,7 +44,6 @@ func (u *Show) Download(reqID string) (string, error) {
 				}
 				defer os.RemoveAll(dir)
 				fpath := filepath.Join(dir, tarfilekey)
-				log.Printf("Creating file: %s", fpath)
 				file, err := os.Create(fpath)
 				if err != nil {
 					return "", err

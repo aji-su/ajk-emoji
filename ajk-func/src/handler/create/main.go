@@ -20,8 +20,6 @@ var (
 )
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Print(req.Body)
-
 	var reqBody model.RequestBody
 	if err := json.Unmarshal([]byte(req.Body), &reqBody); err != nil {
 		log.Print(err)

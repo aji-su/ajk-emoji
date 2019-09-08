@@ -37,8 +37,6 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	psize := rct.Dx() / reqBody.Xsplit
 	ysplit := rct.Dy() / psize
 
-	log.Printf("psize=%d,xsplit=%d,ysplit=%d", psize, reqBody.Xsplit, ysplit)
-
 	var emojis [][]*model.Emoji
 	for i := 0; i < ysplit; i++ {
 		var es []*model.Emoji

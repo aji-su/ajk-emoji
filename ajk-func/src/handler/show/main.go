@@ -18,8 +18,6 @@ var (
 )
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Print(req.Body)
-
 	rc, err := showUsecase.GetEmojis(req.PathParameters["requestId"])
 	if err != nil {
 		log.Print(err)

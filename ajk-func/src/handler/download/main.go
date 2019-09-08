@@ -18,7 +18,6 @@ var (
 )
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Print(req.Body)
 	url, err := downloadUsecase.Download(req.PathParameters["requestId"])
 	if err != nil {
 		log.Print(err)

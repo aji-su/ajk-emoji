@@ -22,7 +22,7 @@ Mappings:
       S3Endpoint: ''
 Globals:
   Function:
-    Timeout: 30
+    Timeout: 300
   Api:
     Cors:
       AllowMethods: '''DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'''
@@ -32,7 +32,7 @@ Resources:
   AjkFunctionCreate:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-template-store.theboss.tech/4a86b22960d42b11a6ada52d5a58c64e
+      CodeUri: s3://sam-template-store.theboss.tech/4e2087aad2a76e73ee82466a0e53f20d
       Handler: ajk-func-create
       Runtime: go1.x
       Tracing: Active
@@ -64,7 +64,7 @@ Resources:
   AjkFunctionShow:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-template-store.theboss.tech/4a86b22960d42b11a6ada52d5a58c64e
+      CodeUri: s3://sam-template-store.theboss.tech/4e2087aad2a76e73ee82466a0e53f20d
       Handler: ajk-func-show
       Runtime: go1.x
       Tracing: Active
@@ -96,7 +96,7 @@ Resources:
   AjkFunctionDownload:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-template-store.theboss.tech/4a86b22960d42b11a6ada52d5a58c64e
+      CodeUri: s3://sam-template-store.theboss.tech/4e2087aad2a76e73ee82466a0e53f20d
       Handler: ajk-func-download
       Runtime: go1.x
       Tracing: Active

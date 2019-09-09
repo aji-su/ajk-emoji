@@ -19,21 +19,19 @@ type Storage struct {
 }
 
 func NewStorage() *Storage {
-	return newStorage(
-		os.Getenv("S3_ENDPOINT"),
-		os.Getenv("S3_BUCKET_NAME"),
-		fmt.Sprintf(
+	ep := os.Getenv("S3_ENDPOINT")
+	bn := os.Getenv("S3_BUCKET_NAME")
+	config := aws.NewConfig().WithS3ForcePathStyle(true)
+	var up string
+	if ep != "" {
+		config = config.WithEndpoint(ep)
+		up = ep
+	} else {
+		up = fmt.Sprintf(
 			"https://s3-%s.amazonaws.com/%s",
 			os.Getenv("AWS_DEFAULT_REGION"),
 			os.Getenv("S3_BUCKET_NAME"),
-		),
-	)
-}
-
-func newStorage(ep, bn, up string) *Storage {
-	config := aws.NewConfig().WithS3ForcePathStyle(true)
-	if ep != "" {
-		config = config.WithEndpoint(ep)
+		)
 	}
 	s := s3.New(session.New(), config)
 	return &Storage{
@@ -41,11 +39,6 @@ func newStorage(ep, bn, up string) *Storage {
 		urlPrefix:  up,
 		client:     s,
 	}
-}
-
-// TODO: temporary
-func (s *Storage) Client() *s3.S3 {
-	return s.client
 }
 
 func (s *Storage) GetObjectURLPrefix() string {

@@ -1,12 +1,7 @@
 <template>
   <v-container>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate />
-    </v-overlay>
-
-    <v-snackbar top :value="errorMessage">
-      {{ errorMessage }}
-    </v-snackbar>
+    <Loading :loading="loading" />
+    <Errors :message.sync="errorMessage" />
 
     <v-layout wrap>
       <v-flex xs12>
@@ -57,10 +52,16 @@
 
 <script>
 import upload from "@/utils/upload.js";
+import Loading from "@/components/molecules/Loading.vue";
+import Errors from "@/components/molecules/Errors.vue";
 
 export default {
   name: "FileUpload",
   props: {},
+  components: {
+    Loading,
+    Errors
+  },
   data() {
     return {
       errorMessage: "",

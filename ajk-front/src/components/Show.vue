@@ -1,8 +1,7 @@
 <template>
   <v-container>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate />
-    </v-overlay>
+    <Loading :loading="loading" />
+    <Errors :message.sync="errorMessage" />
 
     <v-snackbar top :value="errorMessage">
       {{ errorMessage }}
@@ -56,6 +55,8 @@
 <script>
 import show from "@/utils/show.js";
 import getDownloadLink from "@/utils/getDownloadLink.js";
+import Loading from "@/components/molecules/Loading.vue";
+import Errors from "@/components/molecules/Errors.vue";
 
 export default {
   name: "Show",
@@ -64,6 +65,10 @@ export default {
       type: String,
       required: true
     }
+  },
+  components: {
+    Loading,
+    Errors
   },
   data() {
     return {

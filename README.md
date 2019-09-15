@@ -36,5 +36,6 @@ make deploy
 ```bash
 cd ./ajk-front
 yarn install
+echo 'VUE_APP_API_ENDPOINT=http://localhost:3000/ajk' > .env.development.local                                  
 yarn serve
 ```

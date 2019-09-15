@@ -1,24 +1,40 @@
 # ajk-emoji
 
-![](./doc.png)
+## ajk-func
 
-Run:
+### Prerequisites: install master version of aws-sam-cli
+
+clone: https://github.com/awslabs/aws-sam-cli.git
+
+install:
 
 ```bash
-# this command writes image files as "img/zz_xxxx.png"
-
-go run . -html -op img/zz_ -os .png -x 10 < ~/Pictures/input.png > /tmp/preview.html && open /tmp/preview.html
+python3 setup.py install
 ```
 
-Configuration:
+check:
 
-    STDIN
-          input image
-    -html
-          outputs html
-    -op string
-          output filepath prefix (default "img/zz_")
-    -os string
-          output filepath suffix (default ".png")
-    -x int
-          number of columns (default 10)
+```bash
+sam --version
+```
+
+### start local server for development
+
+```bash
+cd ./ajk-func
+make dev
+```
+
+### deploy
+
+```bash
+make deploy
+```
+
+## ajk-front
+
+```bash
+cd ./ajk-front
+yarn install
+yarn serve
+```

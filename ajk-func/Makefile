@@ -18,7 +18,7 @@ package:
 		--output-template-file output-template.yaml \
 		--s3-bucket sam-template-store.theboss.tech
 
-deploy: clean build
+deploy: clean build package
 	sam deploy --profile theboss \
 		--template-file output-template.yaml \
 		--stack-name sam-template-store \

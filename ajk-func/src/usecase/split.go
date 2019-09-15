@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	"log"
 
 	"github.com/theboss/ajk-emoji/ajk-func/src/constant"
 	"github.com/theboss/ajk-emoji/ajk-func/src/model"
@@ -46,9 +45,8 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	queue := make(chan *model.Image)
 	eg := errgroup.Group{}
 	for i := 0; i < u.concurrency; i++ {
-		i := i
 		eg.Go(func() error {
-			return u.worker(queue, i)
+			return u.worker(queue)
 		})
 	}
 
@@ -71,12 +69,10 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 				Key:       piece.GetFullName(),
 				URL:       url,
 			})
-			log.Printf("queueing")
 			queue <- piece
 		}
 		emojis = append(emojis, es)
 	}
-	log.Printf("closing queue")
 	close(queue)
 
 	if err := eg.Wait(); err != nil {
@@ -95,11 +91,9 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	return u.store.Put(reqID+"/metadata.json", b)
 }
 
-func (u *Split) worker(queue <-chan *model.Image, i int) error {
-	log.Printf("worker %d is running", i)
+func (u *Split) worker(queue <-chan *model.Image) error {
 	for piece := range queue {
 		if err := u.store.PutImage(piece); err != nil {
-			log.Printf("worker %d error: %v", i, err)
 			return err
 		}
 	}

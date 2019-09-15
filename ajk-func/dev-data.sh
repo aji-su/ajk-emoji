@@ -1,11 +1,6 @@
 #!/bin/sh
 
-export AWS_ACCESS_KEY_ID=testkey
-export AWS_SECRET_ACCESS_KEY=testsecret
-export AWS_DEFAULT_REGION=ap-northeast-1
-
-docker-compose up -d
-
-aws s3api create-bucket \
-  --bucket=test-bucket \
-  --endpoint-url=http://localhost:9000
+until (mc config host add myminio http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY) do sleep 1; done
+mc mb --region $MINIO_REGION myminio/test-bucket
+mc policy set public myminio/test-bucket
+tail -f /dev/null

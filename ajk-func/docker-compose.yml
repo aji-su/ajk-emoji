@@ -9,3 +9,14 @@ services:
     ports:
       - '9000:9000'
     command: '--compat server /data'
+  mc:
+    image: 'minio/mc'
+    environment:
+      MINIO_ACCESS_KEY: 'testkey'
+      MINIO_SECRET_KEY: 'testsecret'
+      MINIO_REGION: 'ap-northeast-1'
+    volumes:
+      - './dev-data.sh:/dev-data.sh'
+    entrypoint: '/dev-data.sh'
+    depends_on:
+      - minio

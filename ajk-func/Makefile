@@ -1,4 +1,4 @@
-.PHONY: deps clean build package deploy dev
+.PHONY: deps clean build package deploy dev down
 PROJECT_NAME := "ajk-func"
 
 deps:
@@ -18,15 +18,19 @@ package:
 		--output-template-file output-template.yaml \
 		--s3-bucket sam-template-store.theboss.tech
 
-deploy:
+deploy: clean build
 	sam deploy --profile theboss \
 		--template-file output-template.yaml \
 		--stack-name sam-template-store \
 		--capabilities CAPABILITY_IAM \
 		--parameter-overrides Env=prod
 
-dev:
+dev: clean build
+	docker-compose up -d
 	env AWS_ACCESS_KEY_ID=testkey \
 		AWS_SECRET_ACCESS_KEY=testsecret \
 		sam local start-api \
 		--docker-network $$(docker network ls -q -f name=$(PROJECT_NAME))
+
+down:
+	docker-compose down

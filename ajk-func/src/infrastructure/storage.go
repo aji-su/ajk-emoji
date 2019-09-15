@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -20,20 +21,21 @@ type Storage struct {
 
 func NewStorage() *Storage {
 	ep := os.Getenv("S3_ENDPOINT")
+	up := os.Getenv("S3_URL_PREFIX")
 	bn := os.Getenv("S3_BUCKET_NAME")
 	config := aws.NewConfig().WithS3ForcePathStyle(true)
-	var up string
 	if ep != "" {
 		config = config.WithEndpoint(ep)
-		up = ep
-	} else {
+	}
+	if up == "" {
 		up = fmt.Sprintf(
 			"https://s3-%s.amazonaws.com/%s",
 			os.Getenv("AWS_DEFAULT_REGION"),
-			os.Getenv("S3_BUCKET_NAME"),
+			bn,
 		)
 	}
 	s := s3.New(session.New(), config)
+	log.Printf("bucketName=%s urlPrefix=%s", bn, up)
 	return &Storage{
 		bucketName: bn,
 		urlPrefix:  up,

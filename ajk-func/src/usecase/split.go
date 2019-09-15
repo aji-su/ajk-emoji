@@ -6,19 +6,26 @@ import (
 	"image"
 	"log"
 
+	"github.com/theboss/ajk-emoji/ajk-func/src/constant"
 	"github.com/theboss/ajk-emoji/ajk-func/src/model"
+	"golang.org/x/sync/errgroup"
 )
 
+// Split represents usecase of image splitting
 type Split struct {
 	store
+	concurrency int
 }
 
+// NewSplit returns instance of split usecase
 func NewSplit(store store) *Split {
 	return &Split{
-		store: store,
+		store:       store,
+		concurrency: constant.Concurrency,
 	}
 }
 
+// SplitAndPut splits image into number of pieces, and put into s3
 func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	img, err := model.NewImage(
 		"original",
@@ -28,7 +35,6 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	if err != nil {
 		return err
 	}
-
 	if err := u.store.PutImage(img); err != nil {
 		return err
 	}
@@ -36,6 +42,15 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 	rct := img.Source.Bounds()
 	psize := rct.Dx() / reqBody.Xsplit
 	ysplit := rct.Dy() / psize
+
+	queue := make(chan *model.Image)
+	eg := errgroup.Group{}
+	for i := 0; i < u.concurrency; i++ {
+		i := i
+		eg.Go(func() error {
+			return u.worker(queue, i)
+		})
+	}
 
 	var emojis [][]*model.Emoji
 	for i := 0; i < ysplit; i++ {
@@ -47,9 +62,6 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 				fmt.Sprintf(reqBody.FnamePrefix+"%02d%02d", i, j),
 				image.Rect(x, y, x+psize, y+psize),
 			)
-			if err := u.store.PutImage(piece); err != nil {
-				return err
-			}
 			url := fmt.Sprintf("%s/%s",
 				u.store.GetObjectURLPrefix(),
 				piece.GetFullName(),
@@ -59,8 +71,16 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 				Key:       piece.GetFullName(),
 				URL:       url,
 			})
+			log.Printf("queueing")
+			queue <- piece
 		}
 		emojis = append(emojis, es)
+	}
+	log.Printf("closing queue")
+	close(queue)
+
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 
 	b, err := json.Marshal(&model.Metadata{
@@ -73,4 +93,15 @@ func (u *Split) SplitAndPut(reqID string, reqBody *model.RequestBody) error {
 		return err
 	}
 	return u.store.Put(reqID+"/metadata.json", b)
+}
+
+func (u *Split) worker(queue <-chan *model.Image, i int) error {
+	log.Printf("worker %d is running", i)
+	for piece := range queue {
+		if err := u.store.PutImage(piece); err != nil {
+			log.Printf("worker %d error: %v", i, err)
+			return err
+		}
+	}
+	return nil
 }

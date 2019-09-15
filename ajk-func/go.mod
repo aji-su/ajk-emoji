@@ -10,4 +10,5 @@ require (
 	github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
 	golang.org/x/image v0.0.0-20190902063713-cb417be4ba39 // indirect
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 // indirect
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 )

@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  sam-app
+  ajk-func
   
-  Sample SAM Template for sam-app
+  SAM Template for ajk-func
 
 Parameters:
   Env:
@@ -18,14 +18,24 @@ Mappings:
     dev:
       BucketName: 'test-bucket'
       S3Endpoint: 'http://minio:9000'
+      S3UrlPrefix: 'http://localhost:9000/test-bucket'
+      Concurrency: '20'
     prod:
       BucketName: 'test.theboss.tech'
       S3Endpoint: ''
+      S3UrlPrefix: ''
+      Concurrency: '20'
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 30
+    Environment:
+      Variables:
+        S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
+        S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
+        S3_URL_PREFIX: !FindInMap [Envs, !Ref Env, S3UrlPrefix]
+        CONCURRENCY: !FindInMap [Envs, !Ref Env, Concurrency]
   Api:
     Cors:
       AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
@@ -46,10 +56,6 @@ Resources:
           Properties:
             Path: /ajk/create
             Method: POST
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
-          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
       Policies:
         - S3CrudPolicy:
             BucketName: !FindInMap [Envs, !Ref Env, BucketName]
@@ -67,10 +73,6 @@ Resources:
           Properties:
             Path: /ajk/show/{requestId}
             Method: GET
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
-          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
       Policies:
         - S3CrudPolicy:
             BucketName: !FindInMap [Envs, !Ref Env, BucketName]
@@ -88,10 +90,6 @@ Resources:
           Properties:
             Path: /ajk/download/{requestId}
             Method: GET
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !FindInMap [Envs, !Ref Env, BucketName]
-          S3_ENDPOINT: !FindInMap [Envs, !Ref Env, S3Endpoint]
       Policies:
         - S3CrudPolicy:
             BucketName: !FindInMap [Envs, !Ref Env, BucketName]

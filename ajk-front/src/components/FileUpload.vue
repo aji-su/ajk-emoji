@@ -33,7 +33,7 @@
       </v-flex>
 
       <v-flex xs10>
-        <v-btn color="primary" @click="onSubmit" :disabled="uploadReady">
+        <v-btn color="primary" @click="onSubmit" :disabled="!uploadReady">
           Send
         </v-btn>
       </v-flex>
@@ -74,7 +74,7 @@ export default {
 
   computed: {
     uploadReady() {
-      return !this.imageAsDataUrl && !this.loading;
+      return this.imageAsDataUrl && !this.loading;
     }
   },
 

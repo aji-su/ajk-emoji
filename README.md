@@ -2,20 +2,19 @@
 
 ## ajk-func
 
-### Prerequisites: install master version of aws-sam-cli
-
-clone: https://github.com/awslabs/aws-sam-cli.git
+### Prerequisites: install develop version of aws-sam-cli
 
 install:
 
 ```bash
-python3 setup.py install
+pip3 install git+https://github.com/awslabs/aws-sam-cli.git@develop
 ```
 
 check:
 
 ```bash
 sam --version
+# => SAM CLI, version 0.21.0
 ```
 
 ### start local server for development

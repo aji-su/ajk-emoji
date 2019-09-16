@@ -21,12 +21,13 @@ type Storage struct {
 
 func NewStorage() *Storage {
 	ep := os.Getenv("S3_ENDPOINT")
-	up := os.Getenv("S3_URL_PREFIX")
-	bn := os.Getenv("S3_BUCKET_NAME")
 	config := aws.NewConfig().WithS3ForcePathStyle(true)
 	if ep != "" {
 		config = config.WithEndpoint(ep)
 	}
+
+	up := os.Getenv("S3_URL_PREFIX")
+	bn := os.Getenv("S3_BUCKET_NAME")
 	if up == "" {
 		up = fmt.Sprintf(
 			"https://s3-%s.amazonaws.com/%s",

@@ -1,4 +1,4 @@
-.PHONY: deps clean build package deploy dev down
+.PHONY: deps clean build package deploy dev up down
 PROJECT_NAME := "ajk-func"
 
 deps:
@@ -31,6 +31,9 @@ dev: clean build
 		AWS_SECRET_ACCESS_KEY=testsecret \
 		sam local start-api \
 		--docker-network $$(docker network ls -q -f name=$(PROJECT_NAME))
+
+up:
+	docker-compose up -d
 
 down:
 	docker-compose down

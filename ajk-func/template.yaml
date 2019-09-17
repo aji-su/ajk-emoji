@@ -56,7 +56,7 @@ Resources:
           Properties:
             Path: /ajk/create
             Method: POST
-      Policies:
+      Policies: &policy
         - S3CrudPolicy:
             BucketName: !FindInMap [Envs, !Ref Env, BucketName]
 
@@ -74,8 +74,7 @@ Resources:
             Path: /ajk/show/{requestId}
             Method: GET
       Policies:
-        - S3CrudPolicy:
-            BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+        <<: *policy
 
   AjkFunctionDownload:
     Type: AWS::Serverless::Function
@@ -91,8 +90,24 @@ Resources:
             Path: /ajk/download/{requestId}
             Method: GET
       Policies:
-        - S3CrudPolicy:
-            BucketName: !FindInMap [Envs, !Ref Env, BucketName]
+        <<: *policy
+
+  AjkFunctionSplit:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: ajk-func-split
+      Runtime: go1.x
+      Tracing: Active
+      Policies:
+        <<: *policy
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref Bucket
+            Events:
+              - 's3:ObjectCreated:Put'
 
   Bucket:
     Type: AWS::S3::Bucket
@@ -121,6 +136,12 @@ Outputs:
   AjkFunctionDownload:
     Description: "show"
     Value: !GetAtt AjkFunctionShow.Arn
-  AjkFunctionShowIamRole:
+  AjkFunctionDownloadIamRole:
     Description: "download role"
     Value: !GetAtt AjkFunctionDownloadRole.Arn
+  AjkFunctionSplit:
+    Description: "split"
+    Value: !GetAtt AjkFunctionSplit.Arn
+  AjkFunctionSplitIamRole:
+    Description: "split role"
+    Value: !GetAtt AjkFunctionSplitRole.Arn
